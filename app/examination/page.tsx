@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 interface Conversation {
   _id: string;
@@ -64,6 +65,8 @@ export default function ExaminationPage() {
       alert(
         `Evaluated ${data.evaluatedCount} conversations. Refreshing data...`
       );
+
+      // Fetch fresh data after evaluation
       await fetchConversations();
     } catch (error) {
       console.error("Error:", error);
@@ -78,7 +81,13 @@ export default function ExaminationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-green-50 py-8">
+    <div className="min-h-screen bg-green-50 py-8 relative">
+      <Link
+        href="/"
+        className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+      >
+        Back to Home
+      </Link>
       <div className="container mx-auto px-4 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8 text-center text-green-700">
           Examination

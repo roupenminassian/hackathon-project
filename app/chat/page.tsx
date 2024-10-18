@@ -2,6 +2,8 @@
 
 import { useState, FormEvent, useEffect } from "react";
 import Switch from "react-switch";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const initialAssistantMessage = {
   role: "assistant",
@@ -17,6 +19,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isStudentResponse, setIsStudentResponse] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const chatContainer = document.getElementById("chat-container");
@@ -84,6 +87,9 @@ export default function ChatPage() {
       } else {
         alert("Conversation saved successfully!");
       }
+
+      // Redirect to homepage after successful save
+      router.push("/");
     } catch (error) {
       console.error("Error saving conversation:", error);
       alert("Failed to save conversation. Please try again.");
@@ -93,10 +99,16 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-green-50 py-8">
+    <div className="min-h-screen bg-green-50 py-8 relative">
+      <Link
+        href="/"
+        className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+      >
+        Back
+      </Link>
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-green-700">EdTech Chat</h1>
+          <h1 className="text-4xl font-bold text-green-700">Chat</h1>
           <div className="flex items-center">
             <span className="mr-2 text-green-700">AI Generated</span>
             <Switch

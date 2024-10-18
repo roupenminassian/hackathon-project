@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
+import Link from "next/link";
 
 interface PlotData {
   id: string;
@@ -113,11 +114,15 @@ export default function ReviewPage() {
       .attr("class", "tooltip")
       .style("opacity", 0)
       .style("position", "absolute")
-      .style("background-color", "white")
-      .style("border", "solid")
-      .style("border-width", "1px")
+      .style("background-color", "rgba(255, 255, 255, 0.9)")
+      .style("color", "black") // Add this line to set the text color to black
+      .style("border", "1px solid #ddd")
       .style("border-radius", "5px")
-      .style("padding", "10px");
+      .style("padding", "10px")
+      .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+      .style("font-size", "12px")
+      .style("max-width", "250px")
+      .style("z-index", "10");
 
     // Add buffer ranges for AI-generated responses
     svg
@@ -128,7 +133,7 @@ export default function ReviewPage() {
       .attr("class", "buffer")
       .attr("cx", (d) => x(d.x))
       .attr("cy", (d) => y(d.y))
-      .attr("r", (d) => d.bufferRange || 20)
+      .attr("r", (d) => d.bufferRange || 90)
       .style("fill", "none")
       .style("stroke", "#f56565")
       .style("stroke-dasharray", "3,3")
@@ -155,7 +160,7 @@ export default function ReviewPage() {
             Math.sqrt(
               Math.pow(x(studentPoint.x) - x(aiPoint.x), 2) +
                 Math.pow(y(studentPoint.y) - y(aiPoint.y), 2)
-            ) <= (aiPoint.bufferRange || 20)
+            ) <= (aiPoint.bufferRange || 90)
         );
         if (inRange) {
           points
@@ -165,47 +170,33 @@ export default function ReviewPage() {
       }
     });
 
-    let selectedPoint: d3.Selection<
-      SVGCircleElement,
-      unknown,
-      null,
-      undefined
-    > | null = null;
-
-    // Add click interactivity
-    points.on(
-      "click",
-      function (this: SVGCircleElement, event: MouseEvent, d: PlotData) {
-        event.stopPropagation(); // Prevent the click from immediately bubbling up to the svg
-
-        // If there's a previously selected point, reset its appearance
-        if (selectedPoint) {
-          selectedPoint.attr("r", 5);
-        }
-
-        // Select the current point
-        selectedPoint = d3.select(this);
-        selectedPoint.attr("r", 8); // Increase the size of the selected point
-
-        tooltip.transition().duration(200).style("opacity", 0.9);
+    // Add interactivity
+    points
+      .on("mouseover", (event, d) => {
+        tooltip.transition().duration(200).style("opacity", 1);
         tooltip
           .html(
-            `ID: ${d.id}<br/>Content: ${d.content}<br/>Type: ${
-              d.isStudentResponse ? "Student Response" : "AI Generated"
-            }${
-              !d.isStudentResponse
-                ? `<br/><input type="range" min="10" max="50" value="${
-                    d.bufferRange || 20
-                  }" id="bufferRange-${d.id}">`
-                : ""
-            }`
+            `<strong>ID:</strong> ${d.id}<br/>
+             <strong>Content:</strong> ${d.content}<br/>
+             <strong>Type:</strong> ${
+               d.isStudentResponse ? "Student Response" : "AI Generated"
+             }
+             ${
+               !d.isStudentResponse
+                 ? `<br/><strong>Buffer Range:</strong> 
+                    <input type="range" min="10" max="150" value="${
+                      d.bufferRange || 90
+                    }" id="bufferRange-${d.id}">`
+                 : ""
+             }`
           )
           .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY - 28}px`);
+          .style("top", `${event.pageY - 10}px`);
 
         if (!d.isStudentResponse) {
           d3.select(`#bufferRange-${d.id}`).on("input", (event) => {
-            const newRange = parseInt((event.target as HTMLInputElement).value);
+            const target = event.target as HTMLInputElement;
+            const newRange = parseInt(target.value);
             setPlotData((prevData) =>
               prevData.map((point) =>
                 point.id === d.id ? { ...point, bufferRange: newRange } : point
@@ -213,17 +204,10 @@ export default function ReviewPage() {
             );
           });
         }
-      }
-    );
-
-    // Add click-away listener to hide tooltip and deselect point
-    svg.on("click", () => {
-      tooltip.transition().duration(500).style("opacity", 0);
-      if (selectedPoint) {
-        selectedPoint.attr("r", 5); // Reset the size of the previously selected point
-        selectedPoint = null;
-      }
-    });
+      })
+      .on("mouseout", () => {
+        tooltip.transition().duration(500).style("opacity", 0);
+      });
 
     // Add legend
     const legend = svg
@@ -259,7 +243,13 @@ export default function ReviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-green-50 py-8">
+    <div className="min-h-screen bg-green-50 py-8 relative">
+      <Link
+        href="/"
+        className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+      >
+        Back
+      </Link>
       <div className="container mx-auto px-4 max-w-3xl">
         <h1 className="text-4xl font-bold mb-8 text-center text-green-700">
           Review

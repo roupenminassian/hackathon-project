@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       timestamp: new Date(),
       embeddings: [],
       isStudentResponse: isStudentResponse,
-      evaluation: "",
+      evaluation: null,
     });
 
     return NextResponse.json({ success: true, id: result.insertedId });
